@@ -1,0 +1,21 @@
+export default {
+    fontFamily: 'Lato',
+    fontSize: 14,
+    colors: {
+        default: '#1631be',
+        today: '#1631be',
+        tomorrow: '#c9742e',
+        week: '#15721e',
+        month: '#42546a',
+        secondary: '#FFF',
+        mainText: '#222',
+        subText: '#555',
+    },
+    backgroundColor: '#fff',
+    mainText: '#000',
+    secondaryText: '#666',
+    default: '#FFF',
+    error: 'red',
+    warning: 'orange',
+    success: 'green',
+}
