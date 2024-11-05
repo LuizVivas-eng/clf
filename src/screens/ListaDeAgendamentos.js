@@ -44,22 +44,6 @@ export default class ListaDeAgendamentos extends Component {
         this.setState({ showDatePicker: true });
     };
 
-    // Função para lidar com a seleção de data
-    /* onDateChange = async (event, selectedDate) => {
-        const date = selectedDate || this.state.selectedDate;
-        this.setState({ showDatePicker: false, selectedDate: date });
-
-        if (date) {
-            try {
-                const formattedDate = moment(date).format('YYYY-MM-DD');
-                const res = await axios.get(`${server}/agendamento?date=${formattedDate}`);
-                this.setState({ agendamentos: res.data }, this.filterAgendamentos);
-            } catch (e) {
-                showError(e);
-            }
-        }
-    }; */
-
     onDateChange = async (event, selectedDate) => {
 
         if (event.type === "dismissed") {
@@ -76,7 +60,6 @@ export default class ListaDeAgendamentos extends Component {
                 const res = await axios.post(`${server}/agendamento/getAgendamentoParse`, {
                     data: { data: formattedDate }
                 });
-                console.warn('res.data', res.data.result)
                 if (res.data.result.length > 0) {
                     const { apartamento, bloco } = res.data.result[0]
                     Alert.alert(
@@ -128,47 +111,40 @@ export default class ListaDeAgendamentos extends Component {
         }, this.filterAgendamentos)
 
         this.loadAgendamentos()
+
+        // Listener para o evento de foco
+        this.focusListener = this.props.navigation.addListener('focus', () => {
+            this.loadAgendamentos();
+        });
     }
 
     loadAgendamentos = async () => {
+        try {
+            let endpoint = '';
 
-        if (this.props.hojeOuAmanha) {
-
-            try {
-                const maxDate = moment()
-                    .utcOffset(-3) // Define o fuso horário de Brasília
-                    .add(this.props.daysAhead, 'days')
-                    .format('YYYY-MM-DD'); // Apenas a data, sem incluir horas
-                const res = await axios.get(`${server}/hojeOuAmanha?date=${maxDate}`);
-                this.setState({ agendamentos: res.data }, this.filterAgendamentos)
-            } catch (e) {
-                showError(e)
+            if (this.props.hoje) {
+                endpoint = `${server}/hoje`;
+            } else if (this.props.amanha) {
+                endpoint = `${server}/amanha`;
+            } else if (this.props.semana) {
+                endpoint = `${server}/semana`;
+            } else if (this.props.mes) {
+                endpoint = `${server}/mes`;
             }
 
-        } else {
-
-            try {
-                const maxDate = moment()
-                    .add({ days: this.props.daysAhead })
-                    .format('YYYY-MM-DD');
-                const res = await axios.get(`${server}/agendamento?date=${maxDate}`);
-                this.setState({ agendamentos: res.data }, this.filterAgendamentos)
-            } catch (e) {
-                showError(e)
+            if (endpoint) {
+                const res = await axios.get(endpoint);
+                this.setState({ agendamentos: res.data }, this.filterAgendamentos);
+            } else {
+                console.warn('Nenhum filtro foi selecionado!');
             }
-
+        } catch (e) {
+            showError(e);
         }
-    }
+    };
+
 
     filterAgendamentos = () => {
-
-        /* let visibleAgendamentos = null
-        if (this.state.showDoneAgendamentos) {
-            visibleAgendamentos = [...this.state.agendamentos]
-        } else {
-            const pending = agendamento => agendamento.dataAgendamento === null
-            visibleAgendamentos = this.state.agendamentos.filter(pending)
-        } */
 
         this.setState({ visibleAgendamentos: this.state.agendamentos })
         AsyncStorage.setItem('stateAgendamento', JSON.stringify({ showDoneAgendamentos: this.state.showDoneAgendamentos }))
@@ -233,7 +209,6 @@ export default class ListaDeAgendamentos extends Component {
                     onSave={this.addAgendamento} />
                 <ImageBackground source={this.getImage()} style={styles.background}>
 
-                    {/* Icone do olho para mostrar ou esconder as tarefas concluídas | E icone do drawer navigation */}
 
                     <View style={styles.iconBar}>
 
