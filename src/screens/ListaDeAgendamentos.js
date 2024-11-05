@@ -134,6 +134,19 @@ export default class ListaDeAgendamentos extends Component {
 
             if (endpoint) {
                 const res = await axios.get(endpoint);
+
+                /* if (res.data[0]?.dataAgendamento ?? false) {
+                    const [data, hora] = res.data[0].dataAgendamento.split('T'); res.data[0].dataAgendamento = data;
+                } */
+
+                     res.data = res.data.map(item => {
+                        if (item.dataAgendamento) {
+                            const [data] = item.dataAgendamento.split('T');
+                            item.dataAgendamento = data;
+                        }
+                        return item;
+                    });
+
                 this.setState({ agendamentos: res.data }, this.filterAgendamentos);
             } else {
                 console.warn('Nenhum filtro foi selecionado!');
